@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="getHotels" doc:id="7c1e6d6d-77c6-4c23-85eb-58b320eccb9b" >
+		<logger level="INFO" doc:name="Start" doc:id="c66b05df-0e49-4778-a641-36e7a9ae9942" message='#["getHotels Process Start "++ now() as String]'/>
+		<db:select doc:name="Get list of hotels based on City" doc:id="2bafb02e-a57b-43b2-87b0-d4dfddbbbba0" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from Hotels where city=:city]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+'city':vars.city
+}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="95550e4d-284d-4d0a-9600-17ff3c7250cd" message='#["Hotels are not available in " ++ vars.city as String]'>
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="HOTEL_TYPE:HOTELS_NOT_FOUND" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Set Output SOAP payload" doc:id="b763f7e4-635e-4632-aa45-8964df5872e5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+ getHotelsResponse:{
+  (payload map {
+        hotel: {
+          hotelId: $.hotelId,
+          hotelName: $.hotelName,
+          hotelGroup: $.hotelGroup,
+          city:$.city,
+          location: $.location,
+          contact: $.contact
+        }
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End" doc:id="f2dd2418-f546-440e-b337-48453b85e482" message='#["getHotels Process End " ++ now() as String]' />
+	</flow>
+	<flow name="getRoomTypesByHotelId" doc:id="230cc67f-9d17-4a95-a1fa-c28ed52950b3" >
+		<logger level="INFO" doc:name="Start" doc:id="e02e2e85-bb1d-489b-9e0d-1830e88f4ff2" message='#["getRoomTypesById process start "++ now()]'/>
+		<db:select doc:name="Get all rooms based on Hotel Id" doc:id="1e02f152-035a-40b2-961f-f29ade9d4112" config-ref="Database_Config">
+			<db:sql ><![CDATA[select r.roomTypeId,r.name,r.hotelId,r.price,r.amenities,r.maxGuest,:checkIn as checkIn,:checkOut as checkOut,
+IFNULL(r.totalRooms-SUM(hb.noOfRooms),r.totalRooms) AS roomsAvailable,r.totalRooms FROM RoomType r LEFT OUTER JOIN HotelBooking hb on r.roomTypeId = hb.roomTypeId 
+AND hb.checkOut > :checkIn AND hb.checkIn< :checkOut WHERE r.hotelId = :hotelId GROUP BY (r.roomTypeId) having(roomsAvailable >'0')]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'hotelId':payload.hotelId,
+	'checkIn':payload.checkIn,
+	'checkOut':payload.checkOut
+}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="is Rooms Available" doc:id="4ed50b80-54a0-4e33-b902-0130ddea482f" message='#["Currently all rooms are booked. Please check rooms availability for other dates"]'>
+			<error-mapping sourceType="VALIDATION:EMPTY_COLLECTION" targetType="ROOMS:ROOMS_NOT_AVAILABLE" />
+		</validation:is-not-empty-collection>
+		<ee:transform doc:name="Set Output SOAP payload" doc:id="fea13bfa-77cf-4251-95fe-0f814e861f09" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+ getRoomsResponse:{
+  (payload map{
+        roomType: {
+         roomTypeId:$.roomTypeId,
+          name:$.name,
+          pricePerRoom: $.price,
+          hotelId:$.hotelId,
+          amenities:{ ($.amenities splitBy(",") map(item,index)->{
+          	amenity:item
+          })},
+          checkIn: $.checkIn as Date{format:"yyyy-MM-dd"},
+          checkOut: $.checkOut as Date{format:"yyyy-MM-dd"},
+          maxGuestPerRoom:$.maxGuest,
+          roomaAvailable: $.roomsAvailable,
+          totalRooms: $.totalRooms
+        }
+    })
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End" doc:id="3b9e7bfb-0208-4697-b851-9caa28fe197f" message='#["getRoomTypesById process end "++ now() as String]'/>
+	</flow>
+	<flow name="bookRooms" doc:id="9ddf3e24-99ce-4262-a47e-a5c185014ca7" >
+		<logger level="INFO" doc:name="Start" doc:id="ec8c5348-8812-4622-878b-d0399b2bb214" message='#["bookRooms process start" ++ now() as String]'/>
+		<flow-ref doc:name="Validate Input Param" doc:id="0da7bed4-c774-4f74-9dea-12ce9a1ad166" name="bookRoomlValidation"/>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="f663e7f7-a86b-418a-afdf-b7bfbf18e8f0" config-ref="Database_Config">
+			<db:sql ><![CDATA[Insert into HotelBooking(roomTypeId,hotelId,checkIn,checkOut,guestName,mobileNumber,email,noOfGuest,noOfRooms)
+values(:roomTypeId,:hotelId,:checkIn,:checkOut,:guestName,:mobileNumber,:email,:noOfGuest,:noOfRooms)]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform doc:name="Set Output SOAP payload" doc:id="f538f64e-44ec-484a-ad4b-36a1e9d46005" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+ bookRoomsResponse:{
+ message:"Booking done successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End" doc:id="d6415252-6e57-41cc-87ee-d809cff5ae75" message='#["bookRooms process end " ++ now() as String]'/>
+	</flow>
+	<sub-flow name="bookRoomlValidation" doc:id="a9ea925d-6c62-4e88-a1d2-c30163292bb8" >
+		<foreach doc:name="For Each" doc:id="7254783c-c039-48e5-ac58-216173be6bf2" >
+			<set-variable value="#[payload]" doc:name="Initial Payload" doc:id="4e702e69-f3ce-4748-a4a8-e2cd9510236f" variableName="initialPayload" />
+			<db:select doc:name="Get Room by roomTypeId" doc:id="bceb4feb-13f8-4443-a35e-7718f9df5906" config-ref="Database_Config">
+				<db:sql><![CDATA[select r.roomTypeId,r.maxGuest,r.name,
+IFNULL(r.totalRooms-SUM(hb.noOfRooms),r.totalRooms) AS roomsAvailable FROM RoomType r LEFT OUTER JOIN HotelBooking hb on r.roomTypeId = hb.roomTypeId 
+AND hb.checkOut > :checkIn AND hb.checkIn< :checkOut WHERE r.roomTypeId = :roomTypeId GROUP BY (r.roomTypeId)]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+	'roomTypeId':payload.roomTypeId,
+	'checkIn':payload.checkIn,
+	'checkOut':payload.checkOut
+}]]]></db:input-parameters>
+			</db:select>
+			<choice doc:name="Choice" doc:id="2eace3a8-5494-496a-90d4-5375cb162d9a">
+				<when expression="#[vars.initialPayload.noOfGuest &lt;= 0]">
+					<raise-error doc:name="Invalid Number of Guest" doc:id="2cebd2e8-f249-4821-8324-d56cbb0844af" type="BOOK_ROOMS:INVALID_NO_OF_GUEST" description="Please provide valid number of guests" />
+				</when>
+				<otherwise>
+					<validation:is-true doc:name="check number of guest are valid or not" doc:id="f03734bc-dbc2-4b3a-9943-e0bb8d45a99d" expression="#[ vars.initialPayload.noOfGuest &lt;= (payload[0].maxGuest * vars.initialPayload.noOfRooms) or vars.initialPayload.noOfRooms &lt;= 0]" message='#["Number of guest selected should not be greater than " ++ (payload[0].maxGuest * vars.initialPayload.noOfRooms as Number) as String ++ " .As max guests per "++ &#10;payload[0].name as String ++ " type room allowed are-: "++ payload[0].maxGuest as String]'>
+				<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="BOOK_ROOMS:INVALID_NO_OF_GUEST" />
+			</validation:is-true>
+				</otherwise>
+			</choice>
+			<choice doc:name="Choice" doc:id="cc3e53e1-0ab2-4486-ba65-54cb4c6a7824">
+				<when expression="#[vars.initialPayload.noOfRooms &lt;= 0]">
+					<raise-error doc:name="Invalid Number of Rooms" doc:id="8f1b9fc8-e1a2-4209-82fd-6118f235da10" type="ROOMS:INVALID_NO_OF_ROOMS" description="Please provide valid number of rooms" />
+				</when>
+				<otherwise>
+					<validation:is-true doc:name="check number of rooms are valid or not" doc:id="e2425f20-253d-478a-a01f-2febf175b329" expression="#[ vars.initialPayload.noOfRooms&lt;= payload[0].roomsAvailable]" message='#["Only "++ payload[0].roomsAvailable as String ++" room(s) are available.Please correct the number of rooms for "++ payload[0].name ++ " room type."]'>
+				<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="BOOK_ROOMS:INVALID_NO_OF_ROOMS" />
+			</validation:is-true>
+				</otherwise>
+			</choice>
+		</foreach>
+	</sub-flow>
+	<flow name="cancelBooking" doc:id="938550d0-5d1b-4707-bdb5-49fd17bb6fd7" >
+		<logger level="INFO" doc:name="Start" doc:id="3be7eee0-bf4b-4aea-a08d-043cc7c4f686" message='#["cancelBooking process start "++ now() as String]'/>
+		<db:delete doc:name="Delete" doc:id="ad6fd72d-5dad-463c-a6c4-b549ef71cf2f" config-ref="Database_Config">
+			<db:sql ><![CDATA[Delete from HotelBooking where roomTypeId =:roomTypeId 
+and checkIn=:checkIn and checkOut =:checkOut and email=:email]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'roomTypeId':payload.roomTypeId,
+	'checkIn':payload.checkIn,
+	'checkOut':payload.checkOut,
+	'email':payload.email
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Set Output SOAP payload" doc:id="e9232965-fadb-4dd4-8070-c1e2da973c3d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+ cancelBookingResponse:{
+ message:"Booking cancellation done successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End" doc:id="29ddf4be-f280-44e1-8a62-9963d97ee16a" message='#["cancelBooking process End "++ now()]'/>
+	</flow>
+</mule>

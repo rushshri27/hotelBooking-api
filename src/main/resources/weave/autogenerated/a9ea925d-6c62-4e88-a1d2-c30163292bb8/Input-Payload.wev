@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_a9ea925d_6c62_4e88_a1d2_c30163292bb8_Input_Payload = Array<{|  checkIn?: String,   noOfGuest?: String,   mobileNumber?: String,   hotelId?: String,   checkOut?: String,   noOfRooms?: String,   roomTypeId?: String,   email?: String,   guestName?: String|}>
+

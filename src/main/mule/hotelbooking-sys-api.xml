@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/apikit-soap http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="api-httpListenerConfig">
+        <http:listener-connection host="${http.host}" port="${http.port}"/>
+    </http:listener-config>
+    <apikit-soap:config httpStatusVarName="httpStatus" name="soapkit-config" port="HotelBookingServicePort" service="HotelBookingService" wsdlLocation="HotelBookingService.wsdl"/>
+    <flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/HotelBookingService/HotelBookingServicePort">
+            <http:response statusCode="#[attributes.additionalTransportData.statusCode default 200]">
+                <http:headers><![CDATA[#[attributes.protocolHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[attributes.protocolHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit-soap:router config-ref="soapkit-config">
+            <apikit-soap:attributes><![CDATA[#[%dw 2.0
+              output application/java
+              ---
+              {
+                  headers: attributes.headers,
+                  method: attributes.method,
+                  queryString: attributes.queryString
+            }]]]></apikit-soap:attributes>
+        </apikit-soap:router>
+    </flow>
+    <flow name="getHotels:\soapkit-config">
+		<set-variable value="#[%dw 2.0&#10;ns ns0 http://www.hotelBooking.org/HotelBookingService/&#10;---&#10;message.payload.body.ns0#getHotels.city]" doc:name="Set City " doc:id="867c6cef-843c-4cba-9e75-1aa9362969d2" variableName="city"/>
+		<flow-ref doc:name="Get Hotels" doc:id="3fb1168b-bb41-4a0a-bdc1-b66c8410c359" name="getHotels"/>
+    </flow>
+    <flow name="getRooms:\soapkit-config">
+		<ee:transform doc:name="Set Database Parameter" doc:id="71028380-46bc-4db7-bf36-8ed40e60bc1e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0ns ns0 http://www.hotelBooking.org/HotelBookingService/
+
+output application/json
+---
+{
+	"hotelId":message.payload.body.ns0#getRooms.hotelId,	"checkIn":message.payload.body.ns0#getRooms.checkIn,	"checkOut":message.payload.body.ns0#getRooms.checkOut
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Get Room Types of Hotel" doc:id="f848fae4-5c6f-4f2a-a4c5-931151f3f943" name="getRoomTypesByHotelId"/>
+    </flow>
+    <flow name="bookRooms:\soapkit-config">
+        <ee:transform doc:name="Set Database Parameter for Insert" doc:id="f111d8c9-73c0-42c0-bb77-269e7c210517" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0ns ns0 http://www.hotelBooking.org/HotelBookingService/
+
+output application/json
+---
+message.payload.body.ns0#bookRooms.*"input" map(item,index)->{	roomTypeId:item.roomTypeId as Number,	hotelId:item.hotelId as Number,	checkIn:item.checkIn,	checkOut:item.checkOut,	guestName:item.guestName,	mobileNumber:item.mobileNumber,	email:item.email,	noOfGuest:item.noOfGuests as Number,	noOfRooms:item.noOfRooms as Number	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Book Rooms" doc:id="7983fdb7-f9a3-4861-92b3-a98710fcaf30" name="bookRooms"/>
+    </flow>
+    <flow name="cancelBooking:\soapkit-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelopens ns0 http://www.hotelBooking.org/HotelBookingService/
+
+---
+{
+   roomTypeId:message.payload.body.ns0#cancelBooking.roomTypeId,
+   checkIn:message.payload.body.ns0#cancelBooking.checkIn,
+   checkOut:message.payload.body.ns0#cancelBooking.checkOut,
+   email:message.payload.body.ns0#cancelBooking.email
+}]]>
+                </ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="c8a389a1-8e52-430d-8741-ae51503bfe9d" name="cancelBooking"/>
+    </flow>
+</mule>

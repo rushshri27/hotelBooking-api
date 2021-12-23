@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<body>
+   <getRooms>
+      <checkIn>2021-12-27</checkIn>
+      <checkOut>2021-12-29</checkOut>
+      <hotelId>1</hotelId>
+   </getRooms>
+</body>

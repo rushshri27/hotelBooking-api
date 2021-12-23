@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_9ddf3e24_99ce_4262_a47e_a5c185014ca7_Input_Payload = Array<{|  roomTypeId: Number,   hotelId: Number,   checkIn: Date,   checkOut: Date,   guestName: String,   mobileNumber: String,   email: String,   noOfGuest: Number,   noOfRooms: Number|}>
+

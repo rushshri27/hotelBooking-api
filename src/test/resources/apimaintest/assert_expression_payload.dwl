@@ -1,0 +1,4 @@
+%dw 2.0
+import * from dw::test::Asserts
+---
+payload must equalTo("PHNvYXA6RW52ZWxvcGUgeG1sbnM6c29hcD0iaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvc29hcC9lbnZlbG9wZS8iPjxzb2FwOkJvZHk+PHNvYXA6RmF1bHQ+PGZhdWx0Y29kZT5zb2FwOlNlcnZlcjwvZmF1bHRjb2RlPjxmYXVsdHN0cmluZz5GYXVsdCBvY2N1cnJlZCB3aGlsZSBwcm9jZXNzaW5nLjwvZmF1bHRzdHJpbmc+PC9zb2FwOkZhdWx0Pjwvc29hcDpCb2R5Pjwvc29hcDpFbnZlbG9wZT4=" as Binary {base: "64"})

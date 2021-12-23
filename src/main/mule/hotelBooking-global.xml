@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="0173f7ef-5759-4912-8adb-33e16bc74f07" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="41c1d4f5-4250-4b0d-8753-93867afd4ada" file="hotel-config.yaml" />
+	<configuration doc:name="Configuration" doc:id="f3f4a027-0ab2-4143-8fbe-5401ab14df81" defaultErrorHandler-ref="GlobalErrorHandler" />
+	<api-gateway:autodiscovery apiId="17529425" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="6692a1be-b4a9-4fa3-8269-42232198860e" flowRef="api-main" />
+	<error-handler name="GlobalErrorHandler" doc:id="b54d6a73-58c0-48d3-9cd1-9608d371ea9e" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bbbb90b4-9288-4b2b-915a-019733e0d61e" type="HOTEL_TYPE:HOTELS_NOT_FOUND">
+			<ee:transform doc:name="SOAP FAULT" doc:id="5faf4ab2-216d-4d3b-9a82-2896dae808e2">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+{
+        soap#Fault: {
+            faultcode: error.errorType.namespace as String ++":"++ error.errorType.identifier as String ++":server",
+            faultstring: error.description
+        }
+   
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="404" doc:name="HTTP status" doc:id="f01f94e5-b0b8-4201-908e-b6d85583a9ad" variableName="httpStatus" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6a87c8dc-7c42-4a5c-b52c-bcd499a97a07" type="ROOMS:ROOMS_NOT_AVAILABLE">
+			<ee:transform doc:name="SOAP FAULT" doc:id="80d6d579-fa82-4fff-9f31-12935225ccea" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+{
+        soap#Fault: {
+            faultcode: error.errorType.namespace as String ++":"++ error.errorType.identifier as String ++":server",
+            faultstring: error.description
+        }
+   
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="404" doc:name="HTTP status" doc:id="565dc6b7-f677-4698-af3c-5e2dab1f5ef9" variableName="httpStatus" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="d8ec2b7e-d5ea-4319-9d02-57660458b42b" type="BOOK_ROOMS:INVALID_NO_OF_GUEST">
+			<ee:transform doc:name="SOAP FAULT" doc:id="102dd33e-d069-4031-86d8-ea16c17ac33f">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+{
+        soap#Fault: {
+            faultcode: error.errorType.namespace as String ++":"++ error.errorType.identifier as String ++":server",
+            faultstring: error.description
+        }
+   
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="400" doc:name="HTTP status" doc:id="0900cceb-7ab0-4721-91e4-c7180f42f9fb" variableName="httpStatus" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="5604ea97-d61f-4e52-a52b-b790fc28194f" type="BOOK_ROOMS:INVALID_NO_OF_ROOMS">
+			<ee:transform doc:name="SOAP FAULT" doc:id="b90985e1-1935-465c-b11c-d9a29d7a2585">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+{
+        soap#Fault: {
+            faultcode: error.errorType.namespace as String ++":"++ error.errorType.identifier as String ++":server",
+            faultstring: error.description
+        }
+   
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="400" doc:name="HTTP status" doc:id="3f061b94-1175-4136-a3fb-53985c725517" variableName="httpStatus" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="13bdea03-a6bf-446c-9bdd-e3cdbd1db57b" type="ANY">
+			<ee:transform doc:name="SOAP FAULT" doc:id="348fb817-5574-4b84-aa27-deeb7166248e">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope
+---
+{
+        soap#Fault: {
+            faultcode: error.errorType.namespace as String ++":"++ error.errorType.identifier as String ++":server",
+            faultstring: error.description
+        }
+   
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>
