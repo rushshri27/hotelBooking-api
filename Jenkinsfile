@@ -12,7 +12,7 @@ steps {
 bat ‘mvn test’
 }
 }
-stage(‘Deploy CloudHub’) {
+stage(‘Deploy’) {
 environment {
 ANYPOINT_CREDENTIALS = credentials(‘anypoint.credentials’)
 }
