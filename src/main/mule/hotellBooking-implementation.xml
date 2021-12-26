@@ -26,7 +26,7 @@ ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
  getHotelsResponse:{
   (payload map {
-        hotel: {
+        return: {
           hotelId: $.hotelId,
           hotelName: $.hotelName,
           hotelGroup: $.hotelGroup,
@@ -63,7 +63,7 @@ ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
  getRoomsResponse:{
   (payload map{
-        roomType: {
+        return: {
          roomTypeId:$.roomTypeId,
           name:$.name,
           pricePerRoom: $.price,
