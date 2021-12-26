@@ -3,7 +3,7 @@ import * from dw::test::Asserts
 ---
 payload must equalTo({
   "getRoomsResponse": {
-    "roomType": {
+    "return": {
       "roomTypeId": "1",
       "pricePerRoom": "1500",
       "hotelId": "1",
