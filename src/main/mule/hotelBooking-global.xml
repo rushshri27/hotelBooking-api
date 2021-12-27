@@ -11,6 +11,7 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 	</db:config>
 	<configuration-properties doc:name="Configuration properties" doc:id="41c1d4f5-4250-4b0d-8753-93867afd4ada" file="hotel-config.yaml" />
 	<configuration doc:name="Configuration" doc:id="f3f4a027-0ab2-4143-8fbe-5401ab14df81" defaultErrorHandler-ref="GlobalErrorHandler" />
+	<api-gateway:autodiscovery apiId="17529425" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="23b124dd-ece7-4d09-a792-685c6dce0025" flowRef="api-main" />
 	<error-handler name="GlobalErrorHandler" doc:id="b54d6a73-58c0-48d3-9cd1-9608d371ea9e" >
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bbbb90b4-9288-4b2b-915a-019733e0d61e" type="HOTEL_TYPE:HOTELS_NOT_FOUND">
 			<ee:transform doc:name="SOAP FAULT" doc:id="5faf4ab2-216d-4d3b-9a82-2896dae808e2">
