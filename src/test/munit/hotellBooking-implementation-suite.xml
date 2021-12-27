@@ -75,7 +75,7 @@ assert_expression_payload1::main({payload: payload, attributes: attributes, vars
 
 		</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="66d71267-d6e6-4a30-996c-d4d72c30413a" is='#[MunitTools::equalTo("Hotels are not available in " ++ vars.city as String)]' expression="#[%dw 2.0&#10;ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#Fault.faultstring]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="66d71267-d6e6-4a30-996c-d4d72c30413a" is='#[MunitTools::equalTo("Hotels are not available in " ++ vars.city as String)]' expression="#[%dw 2.0&#10;ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.faultstring]" />
 
 		</munit:validation>
 	
@@ -135,7 +135,7 @@ assert_expression_payload::main({payload: payload, attributes: attributes, vars:
 
 		</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="7bae0fdf-3371-4c13-8fe0-874cf5abcae7" is='#[MunitTools::equalTo("Currently all rooms are booked. Please check rooms availability for other dates")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#Fault.faultstring]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7bae0fdf-3371-4c13-8fe0-874cf5abcae7" is='#[MunitTools::equalTo("Currently all rooms are booked. Please check rooms availability for other dates")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.faultstring]" />
 		</munit:validation>
 	
 </munit:test>
@@ -197,7 +197,7 @@ assert_expression_payload1::main({payload: payload, attributes: attributes, vars
 			</try>
 			</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="33c683c1-416a-4466-b238-ab8a2c4d0e30" is='#[MunitTools::equalTo("Number of guest selected should not be greater than 2 .As max guests per Single type room allowed are-: 2")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#Fault.faultstring]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="33c683c1-416a-4466-b238-ab8a2c4d0e30" is='#[MunitTools::equalTo("Number of guest selected should not be greater than 2 .As max guests per Single type room allowed are-: 2")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.faultstring]" />
 			</munit:validation>
 		</munit:test>
 		<munit:test name="bookRooms-test-max_guest-error1" doc:id="aea20d11-c13f-483d-b1a1-f5e24aa429c9">
@@ -244,11 +244,7 @@ assert_expression_payload1::main({payload: payload, attributes: attributes, vars
 			</try>
 			</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="4c66e036-fcc3-48fb-8626-ae86a65a4d9a" is='#[MunitTools::equalTo("Please provide valid number of guests")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope
-&#10;
-&#10;output application/java
-&#10; ---
-&#10; payload.ns0#Fault.faultstring]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="4c66e036-fcc3-48fb-8626-ae86a65a4d9a" is='#[MunitTools::equalTo("Please provide valid number of guests")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.faultstring]" />
 			</munit:validation>
 		</munit:test>
 		
@@ -297,11 +293,7 @@ assert_expression_payload1::main({payload: payload, attributes: attributes, vars
 			</try>
 			</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="196aa394-6470-4e80-8f88-2baeaa36a07a" is='#[MunitTools::equalTo("Only 4 room(s) are available.Please correct the number of rooms for Single room type.")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope
-&#10;
-&#10;output application/java
-&#10; ---
-&#10; payload.ns0#Fault.faultstring]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="196aa394-6470-4e80-8f88-2baeaa36a07a" is='#[MunitTools::equalTo("Only 4 room(s) are available.Please correct the number of rooms for Single room type.")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.faultstring]" />
 			</munit:validation>
 		</munit:test>
 		<munit:test name="bookRooms-test-invalid-number-of-rooms1" doc:id="ee7ad46c-57de-4250-a1f2-0a0c1f05284e">
@@ -350,11 +342,7 @@ assert_expression_payload1::main({payload: payload, attributes: attributes, vars
 			</try>
 			</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="cb643f45-e797-4acf-b548-cbb341a2f610" is='#[MunitTools::equalTo("Please provide valid number of rooms")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope
-&#10;
-&#10;output application/java
-&#10; ---
-&#10; payload.ns0#Fault.faultstring]" />
+			<munit-tools:assert-that doc:name="Assert that" doc:id="cb643f45-e797-4acf-b548-cbb341a2f610" is='#[MunitTools::equalTo("Please provide valid number of rooms")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.faultstring]" />
 			</munit:validation>
 		</munit:test>
 	<munit:test name="cancelBooking-test-success" doc:id="6daeb015-429d-4889-b4fc-50b02c8e8fc2">
@@ -384,7 +372,7 @@ assert_expression_payload::main({payload: payload, attributes: attributes, vars:
 			</munit-tools:assert>
 		</munit:validation>
 	</munit:test>
-	<munit:test name="cancelBooking-test-error" doc:id="c4d65a07-bed1-44a1-95e3-e93ac29d4c14" >
+	<munit:test name="cancelBooking-test-error" doc:id="c4d65a07-bed1-44a1-95e3-e93ac29d4c14">
 		<munit:behavior >
 			<munit-tools:mock-when doc:name="Mock Delete" doc:id="c959510f-8f2f-4896-9219-35c37120c54b" processor="db:delete">
 				<munit-tools:with-attributes >
@@ -412,7 +400,7 @@ assert_expression_payload::main({payload: payload, attributes: attributes, vars:
 
 		</munit:execution>
 		<munit:validation>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="a1df4139-35e9-4e08-8c3a-4d22e6fe0404" is='#[MunitTools::equalTo("DB:CONNECTIVITY:server")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;&#10;&#10;output application/java&#10;&#10; ---&#10;&#10; payload.ns0#Fault.faultcode]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a1df4139-35e9-4e08-8c3a-4d22e6fe0404" is='#[MunitTools::equalTo("DB:CONNECTIVITY")]' expression="#[ns ns0 http://schemas.xmlsoap.org/soap/envelope&#10;&#10;output application/java&#10; ---&#10; payload.ns0#body.ns0#Fault.detail]"/>
 
 		</munit:validation>
 	
