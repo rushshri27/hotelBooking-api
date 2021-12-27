@@ -19,13 +19,14 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 output application/xml
 ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
-{
-    soap#body: {
+{soap#Envelope:{
+    soap#Body: {
         soap#Fault: {
             faultcode: "soap:Server",
             faultstring: error.description,
             detail: error.errorType.namespace as String ++ ":" ++ error.errorType.identifier as String
         }
+    }
     } 
 }
 ]]></ee:set-payload>
@@ -40,15 +41,17 @@ ns soap http://schemas.xmlsoap.org/soap/envelope
 output application/xml
 ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
-{
-    soap#body: {
+{soap#Envelope:{
+    soap#Body: {
         soap#Fault: {
             faultcode: "soap:Server",
             faultstring: error.description,
             detail: error.errorType.namespace as String ++ ":" ++ error.errorType.identifier as String
         }
+    }
     } 
-}]]></ee:set-payload>
+}
+]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 			<set-variable value="404" doc:name="HTTP status" doc:id="565dc6b7-f677-4698-af3c-5e2dab1f5ef9" variableName="httpStatus" />
@@ -60,15 +63,17 @@ ns soap http://schemas.xmlsoap.org/soap/envelope
 output application/xml
 ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
-{
-    soap#body: {
+{soap#Envelope:{
+    soap#Body: {
         soap#Fault: {
             faultcode: "soap:Server",
             faultstring: error.description,
             detail: error.errorType.namespace as String ++ ":" ++ error.errorType.identifier as String
         }
+    }
     } 
-}]]></ee:set-payload>
+}
+]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 			<set-variable value="400" doc:name="HTTP status" doc:id="0900cceb-7ab0-4721-91e4-c7180f42f9fb" variableName="httpStatus" />
@@ -80,15 +85,17 @@ ns soap http://schemas.xmlsoap.org/soap/envelope
 output application/xml
 ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
-{
-    soap#body: {
+{soap#Envelope:{
+    soap#Body: {
         soap#Fault: {
             faultcode: "soap:Server",
             faultstring: error.description,
             detail: error.errorType.namespace as String ++ ":" ++ error.errorType.identifier as String
         }
+    }
     } 
-}]]></ee:set-payload>
+}
+]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 			<set-variable value="400" doc:name="HTTP status" doc:id="3f061b94-1175-4136-a3fb-53985c725517" variableName="httpStatus" />
@@ -100,15 +107,17 @@ ns soap http://schemas.xmlsoap.org/soap/envelope
 output application/xml
 ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
-{
-    soap#body: {
+{soap#Envelope:{
+    soap#Body: {
         soap#Fault: {
             faultcode: "soap:Server",
             faultstring: error.description,
             detail: error.errorType.namespace as String ++ ":" ++ error.errorType.identifier as String
         }
+    }
     } 
-}]]></ee:set-payload>
+}
+]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 		</on-error-propagate>
